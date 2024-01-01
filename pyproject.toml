@@ -61,13 +61,17 @@ line-length = 120
 "__init__.py" = ["F401"]
 
 [tool.isort]
-line_length = 120
-known_first_party = 'pydantic'
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
 combine_as_imports = true
+include_trailing_comma = true
+line_length = 120
+profile = "black"
+
+default_section = "THIRDPARTY"
+sections = "FUTURE,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
+
+known_first_party = "python_template"
+
 
 [tool.pytest.ini_options]
-asyncio_mode = 'strict'
-testpaths = 'organizeit2/tests'
+asyncio_mode = "strict"
+testpaths = "organizeit2/tests"
