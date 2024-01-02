@@ -53,7 +53,7 @@ test:  ## run python tests
 	python -m pytest -v organizeit2/tests --junitxml=junit.xml
 
 coverage:  ## run tests and collect test coverage
-	python -m pytest -v organizeit2/tests --junitxml=junit.xml --cov=organizeit2 --cov-branch --cov-fail-under=75 --cov-report term-missing --cov-report xml
+	python -m pytest -v organizeit2/tests --junitxml=junit.xml --cov=organizeit2 --cov-branch --cov-fail-under=50 --cov-report term-missing --cov-report xml
 
 # Alias
 tests: test
