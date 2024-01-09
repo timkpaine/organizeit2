@@ -11,8 +11,10 @@ license = { text = "Apache-2.0" }
 version = "0.1.0"
 requires-python = ">=3.8"
 keywords = [
-    "some",
-    "keywords",
+    "file",
+    "hierarchy",
+    "organization",
+    "config",
 ]
 
 classifiers = [
@@ -64,7 +66,7 @@ profile = "black"
 default_section = "THIRDPARTY"
 sections = "FUTURE,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
 
-known_first_party = "python_template"
+known_first_party = "organizeit2"
 
 [tool.pytest.ini_options]
 asyncio_mode = "strict"
