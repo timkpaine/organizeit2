@@ -1,19 +1,16 @@
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend="setuptools.build_meta"
+requires = ["hatchling"]
+build-backend="hatchling.build"
 
 [project]
 name = "organizeit2"
-authors = [{name = "Tim Paine", email = "t.paine154@gmail.com"}]
-description="Engage with Zorp"
+authors = [{name = "the organizeit2 authors", email = "3105306+timkpaine@users.noreply.github.com"}]
+description="Engage with Zorp!"
 readme = "README.md"
 license = { text = "Apache-2.0" }
 version = "0.1.0"
-requires-python = ">=3.8"
-keywords = [
-    "some",
-    "keywords",
-]
+requires-python = ">=3.9"
+keywords = []
 
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -27,9 +24,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 
-dependencies = [
-    "numpy",
-]
+dependencies = []
 
 [project.urls]
 Repository = "https://github.com/timkpaine/organizeit2"
@@ -37,41 +32,104 @@ Homepage = "https://github.com/timkpaine/organizeit2"
 
 [project.optional-dependencies]
 develop = [
-    "bump2version",
+    "build",
+    "bump-my-version",
     "check-manifest",
-    "isort",
+    "hatchling",
     "pytest",
     "pytest-cov",
     "ruff",
     "twine",
     "wheel",
 ]
-test = [
-    "pytest",
-    "pytest-cov",
-]
+
+[project.scripts]
+
+[tool.bumpversion]
+current_version = "0.1.0"
+commit = true
+tag = true
+
+[[tool.bumpversion.files]]
+filename = "organizeit2/__init__.py"
+search = '__version__ = "{current_version}"'
+replace = '__version__ = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
 
 [tool.check-manifest]
-ignore = []
+ignore = [
+    ".copier-answers.yml",
+    "Makefile",
+    "setup.py",
+]
 
-[tool.ruff]
-line-length = 120
+[tool.coverage.run]
+branch = true
+omit = [
+    "organizeit2/tests/integration/",
+]
+[tool.coverage.report]
+exclude_also = [
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "@(abc\\.)?abstractmethod",
+]
+ignore_errors = true
+fail_under = 50
 
-[tool.ruff.per-file-ignores]
-"__init__.py" = ["F401"]
+[tool.hatch.build]
+artifacts = []
 
-[tool.isort]
-combine_as_imports = true
-include_trailing_comma = true
-line_length = 120
-profile = "black"
+[tool.hatch.build.sources]
+src = "/"
 
-default_section = "THIRDPARTY"
-sections = "FUTURE,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
+[tool.hatch.build.targets.sdist]
+include = [
+    "/organizeit2",
+    "LICENSE",
+    "README.md",
+]
+exclude = [
+    ".copier-answers.yml",
+    "/.github",
+    "/.gitattributes",
+    "/.gitignore",
+]
 
-known_first_party = "python_template"
+[tool.hatch.build.targets.wheel]
+include = [
+    "/organizeit2",
+]
+exclude = [
+    ".copier-answers.yml",
+    "/.github",
+    "/.gitattributes",
+    "/.gitignore",
+    "/pyproject.toml",
+]
 
+[tool.hatch.build.targets.wheel.shared-data]
 
 [tool.pytest.ini_options]
+addopts = ["-vvv", "--junitxml=junit.xml"]
 asyncio_mode = "strict"
 testpaths = "organizeit2/tests"
+
+[tool.ruff]
+line-length = 150
+
+[tool.ruff.lint]
+extend-select = ["I"]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+default-section = "third-party"
+known-first-party = ["organizeit2"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]

@@ -18,15 +18,15 @@ install:  ## install library
 .PHONY: lint lints fix format
 
 lint:  ## run python linter with ruff
-	python -m isort --check organizeit2 setup.py
-	python -m ruff organizeit2 setup.py
+	python -m ruff check organizeit2
+	python -m ruff format --check organizeit2
 
 # Alias
 lints: lint
 
 fix:  ## fix python formatting with ruff
-	python -m isort organizeit2 setup.py
-	python -m ruff format organizeit2 setup.py
+	python -m ruff check --fix organizeit2
+	python -m ruff format organizeit2
 
 # alias
 format: fix
@@ -34,7 +34,7 @@ format: fix
 ################
 # Other Checks #
 ################
-.PHONY: check-manifest checks check
+.PHONY: check-manifest checks check annotate
 
 check-manifest:  ## check python sdist manifest with check-manifest
 	check-manifest -v
@@ -44,16 +44,19 @@ checks: check-manifest
 # Alias
 check: checks
 
+annotate:  ## run python type annotation checks with mypy
+	python -m mypy ./organizeit2
+
 #########
 # TESTS #
 #########
 .PHONY: test coverage tests
 
 test:  ## run python tests
-	python -m pytest -v organizeit2/tests --junitxml=junit.xml
+	python -m pytest -v organizeit2/tests
 
 coverage:  ## run tests and collect test coverage
-	python -m pytest -v organizeit2/tests --junitxml=junit.xml --cov=organizeit2 --cov-branch --cov-fail-under=75 --cov-report term-missing --cov-report xml
+	python -m pytest -v organizeit2/tests --cov=organizeit2 --cov-report term-missing --cov-report xml
 
 # Alias
 tests: test
@@ -64,16 +67,16 @@ tests: test
 .PHONY: show-version patch minor major
 
 show-version:  ## show current library version
-	bump2version --dry-run --allow-dirty setup.py --list | grep current | awk -F= '{print $2}'
+	@bump-my-version show current_version
 
 patch:  ## bump a patch version
-	bump2version patch
+	@bump-my-version bump patch
 
 minor:  ## bump a minor version
-	bump2version minor
+	@bump-my-version bump minor
 
 major:  ## bump a major version
-	bump2version major
+	@bump-my-version bump major
 
 ########
 # DIST #
