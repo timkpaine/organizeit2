@@ -7,7 +7,7 @@ from fsspec.implementations.local import AbstractFileSystem
 from pydantic.annotated_handlers import GetCoreSchemaHandler
 from pydantic.json_schema import GetJsonSchemaHandler, JsonSchemaValue
 from pydantic_core import CoreSchema
-from pydantic_core.core_schema import any_schema, no_info_after_validator_function, plain_serializer_function_ser_schema, str_schema
+from pydantic_core.core_schema import any_schema, no_info_after_validator_function, plain_serializer_function_ser_schema
 from typing_extensions import Annotated, Literal
 
 __all__ = (
@@ -71,14 +71,23 @@ class Path:
                 self.type = "fsspec-file"
         else:
             self.fs = fs
-            self.path = path
-            self.type = type
+            self.path = BasePath(path)
+            self.type = type if type else "fsspec-dir" if fs.isdir(path) else "fsspec-file"
+
+    def isdir(self) -> bool:
+        return self.type == "fsspec-dir"
+
+    def isfile(self) -> bool:
+        return self.type == "fsspec-file"
 
     def __repr__(self) -> str:
         return f"{'DirectoryPath' if self.type == 'fsspec-dir' else 'FilePath'}(fs={self.fs.unstrip_protocol('')}, path={str(self.path)})"
 
     def __str__(self) -> str:
         return self.fs.unstrip_protocol(self.path.as_posix())
+
+    def __lt__(self, other) -> bool:
+        return str(self) < str(other)
 
 
 @dataclass
@@ -88,12 +97,12 @@ class FSSpecPathType:
     def __get_pydantic_core_schema__(self, source: type[Any], handler: GetCoreSchemaHandler) -> CoreSchema:
         assert source is Path
         return no_info_after_validator_function(
-            self._validate_file if self.path_type == "fsspec-file" else self._validate_dir,
-            str_schema(),
+            self._validate_dir if self.path_type == "fsspec-dir" else self._validate_file if self.path_type == "fsspec-file" else self._validate_any,
+            any_schema(),
             serialization=plain_serializer_function_ser_schema(
                 self._serialize,
                 info_arg=False,
-                return_schema=str_schema(),
+                return_schema=any_schema(),
             ),
         )
 
@@ -105,6 +114,10 @@ class FSSpecPathType:
 
     @staticmethod
     def _validate_dir(value: str, _raise: bool = True) -> "Path":
+        if isinstance(value, Path):
+            if value.type != "fsspec-dir" and _raise:
+                raise ValueError("Not a dir")
+            return value
         fs, _, paths = get_fs_token_paths(value)
         if not fs.isdir(paths[0]) and _raise:
             raise ValueError("Not a dir")
@@ -112,10 +125,23 @@ class FSSpecPathType:
 
     @staticmethod
     def _validate_file(value: str, _raise: bool = True) -> "Path":
+        if isinstance(value, Path):
+            if value.type != "fsspec-file" and _raise:
+                raise ValueError("Not a file")
+            return value
         fs, _, paths = get_fs_token_paths(value)
         if not fs.isfile(paths[0]) and _raise:
             raise ValueError("Not a file")
         return Path(fs, BasePath(paths[0]), "fsspec-file")
+
+    @staticmethod
+    def _validate_any(value: str, _raise: bool = True) -> "Path":
+        if isinstance(value, Path):
+            if value.type not in ("fsspec-file", "fsspec-dir") and _raise:
+                raise ValueError("Not a file/dir")
+            return value
+        fs, _, paths = get_fs_token_paths(value)
+        return Path(fs, BasePath(paths[0]), "fsspec-file" if fs.isfile(paths[0]) else "fsspec-dir")
 
     @staticmethod
     def _serialize(value: "Path") -> str:
