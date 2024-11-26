@@ -20,8 +20,13 @@ class TestFSSpecTypes:
 
     def test_dir(self):
         dir = DirectoryPath("local:///tmp")
-        print(type(dir))
         assert isinstance(dir, Path)
         assert isinstance(dir.fs, AbstractFileSystem)
         assert isinstance(dir.path, BasePath)
         assert str(dir) == "file:///tmp"
+
+    def test_resolve(self):
+        dir = Path("local:///tmp")
+        assert dir.type == "fsspec-dir"
+        file = Path(f"local://{__file__}")
+        assert file.type == "fsspec-file"
