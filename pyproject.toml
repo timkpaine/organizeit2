@@ -47,6 +47,8 @@ develop = [
     "ruff",
     "twine",
     "wheel",
+    # backends
+    "s3fs",
 ]
 
 [project.scripts]
