@@ -36,6 +36,10 @@ class TestTypes:
         d = Directory(path=directory_str)
         assert len([str(_) for _ in d.recurse()]) == 64
 
+    def test_path_hashable(self, directory_str):
+        d = Directory(path=directory_str)
+        assert len(set(d.recurse())) == 64
+
     # TODO
     # def test_directory_list(self, directory_str):
     #     d = Directory(path=directory_str)

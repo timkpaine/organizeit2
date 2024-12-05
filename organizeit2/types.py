@@ -18,6 +18,9 @@ class Directory(BaseModel):
     def __str__(self) -> str:
         return str(self.path)
 
+    def __hash__(self) -> str:
+        return hash(str(self))
+
     def __lt__(self, other) -> bool:
         return str(self) < str(other)
 
@@ -54,6 +57,9 @@ class File(BaseModel):
 
     def __str__(self) -> str:
         return str(self.path)
+
+    def __hash__(self) -> str:
+        return hash(str(self))
 
     def __lt__(self, other) -> bool:
         return str(self) < str(other)
