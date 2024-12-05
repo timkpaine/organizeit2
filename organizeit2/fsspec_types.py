@@ -86,6 +86,9 @@ class Path:
     def __str__(self) -> str:
         return self.fs.unstrip_protocol(self.path.as_posix())
 
+    def __hash__(self) -> str:
+        return hash(str(self))
+
     def __lt__(self, other) -> bool:
         return str(self) < str(other)
 
