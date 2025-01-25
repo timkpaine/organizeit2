@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import pytest
 from fsspec import AbstractFileSystem
 
 from organizeit2 import Directory, DirectoryPath, OrganizeIt
@@ -39,6 +40,22 @@ class TestTypes:
     def test_path_hashable(self, directory_str):
         d = Directory(path=directory_str)
         assert len(set(d.recurse())) == 64
+
+    def test_size(self, directory_str):
+        d = Directory(path=directory_str)
+        assert d.size() == 262144
+
+    def test_link(self, directory_str):
+        d = Directory(path=directory_str)
+        d2 = Directory(path=f"{directory_str}_link")
+        d.link(d2)
+        d2.unlink()
+
+    def test_cant_link(self, directory_str):
+        d = Directory(path=directory_str)
+        d2 = Directory(path=directory_str)
+        with pytest.raises(RuntimeError):
+            d.link(d2)
 
     # TODO
     # def test_directory_list(self, directory_str):
