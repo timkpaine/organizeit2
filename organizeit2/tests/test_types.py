@@ -57,6 +57,23 @@ class TestTypes:
         with pytest.raises(RuntimeError):
             d.link(d2)
 
+    def test_match(self, directory_str):
+        d = Directory(path=directory_str)
+        assert d.match("directory*")
+        assert d.match("directory*", invert=True) is False
+        assert d.match("directory", name_only=False) is False
+        assert d.match("directory", name_only=False, invert=True)
+        assert d.match("*organizeit2*directory", name_only=False)
+        assert d.match("*organizeit2*directory", name_only=False, invert=True) is False
+
+    def test_rematch(self, directory_str):
+        d = Directory(path=directory_str)
+        assert d.rematch("directory")
+        assert d.rematch("directory", invert=True) is False
+        assert d.rematch("directory", name_only=False) is False
+        assert d.rematch("directory", name_only=False, invert=True)
+        assert d.rematch("file://[a-zA-Z0-9/]*", name_only=False)
+
     # TODO
     # def test_directory_list(self, directory_str):
     #     d = Directory(path=directory_str)
