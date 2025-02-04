@@ -1,4 +1,6 @@
+from fnmatch import fnmatch
 from os import symlink, unlink
+from re import match as re_match
 
 from ccflow import BaseModel
 from fsspec.implementations.local import LocalFileSystem
@@ -46,6 +48,47 @@ class SharedAPI:
             raise NotImplementedError(f"Unlink not implemented for {self.path.fs}")
         if self._can_link():
             unlink(str(self.path.path))
+
+    def match(self, pattern: str, *, name_only: bool = True, invert: bool = False) -> bool:
+        if name_only:
+            return fnmatch(self.name, pattern) ^ invert
+        return fnmatch(str(self), pattern) ^ invert
+
+    def rematch(self, re: str, *, name_only: bool = True, invert: bool = False) -> bool:
+        if name_only:
+            return (re_match(re, self.name) is not None) ^ invert
+        return (re_match(re, str(self)) is not None) ^ invert
+
+    # Builtins
+    @property
+    def name(self):
+        """The final path component, if any."""
+        return self.path.path.name
+
+    @property
+    def suffix(self):
+        """
+        The final component's last suffix, if any.
+
+        This includes the leading period. For example: '.txt'
+        """
+        return self.path.path.suffix
+
+    @property
+    def stem(self):
+        """The final path component, minus its last suffix."""
+        return self.path.path.stem
+
+    @property
+    def parts(self):
+        """An object providing sequence-like access to the
+        components in the filesystem path."""
+        return self.path.path.parts
+
+    @property
+    def parent(self):
+        """The logical parent of the path."""
+        return Path(fs=self.path.fs, path=self.path.path.parent)
 
 
 class Directory(SharedAPI, BaseModel):
