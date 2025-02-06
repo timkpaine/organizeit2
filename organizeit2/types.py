@@ -49,6 +49,12 @@ class SharedAPI:
         if self._can_link():
             unlink(str(self.path.path))
 
+    def resolve(self):
+        # TODO
+        if self.path.isdir():
+            return Directory(path=self.path)
+        return File(path=self.path)
+
     def match(self, pattern: str, *, name_only: bool = True, invert: bool = False) -> bool:
         if name_only:
             return fnmatch(self.name, pattern) ^ invert
