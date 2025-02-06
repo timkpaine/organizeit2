@@ -5,7 +5,7 @@ build-backend="hatchling.build"
 [project]
 name = "organizeit2"
 authors = [{name = "the organizeit2 authors", email = "3105306+timkpaine@users.noreply.github.com"}]
-description="Engage with Zorp!"
+description = "Engage with Zorp!"
 readme = "README.md"
 license = { text = "Apache-2.0" }
 version = "0.2.1"
@@ -17,6 +17,7 @@ keywords = [
 
 classifiers = [
     "Development Status :: 3 - Alpha",
+    "Programming Language :: Python",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
     "Programming Language :: Python :: 3",
@@ -79,7 +80,7 @@ replace = 'version = "{new_version}"'
 ignore = [
     ".copier-answers.yml",
     "Makefile",
-    "setup.py",
+    "docs/**/*",
 ]
 
 [tool.coverage.run]
@@ -103,29 +104,10 @@ artifacts = []
 src = "/"
 
 [tool.hatch.build.targets.sdist]
-include = [
-    "/organizeit2",
-    "LICENSE",
-    "README.md",
-]
-exclude = [
-    ".copier-answers.yml",
-    "/.github",
-    "/.gitattributes",
-    "/.gitignore",
-]
+packages = ["organizeit2"]
 
 [tool.hatch.build.targets.wheel]
-include = [
-    "/organizeit2",
-]
-exclude = [
-    ".copier-answers.yml",
-    "/.github",
-    "/.gitattributes",
-    "/.gitignore",
-    "/pyproject.toml",
-]
+packages = ["organizeit2"]
 
 [tool.hatch.build.targets.wheel.shared-data]
 
