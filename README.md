@@ -26,3 +26,8 @@ The name is because `organizeit` was [taken on pypi](https://pypi.org/project/or
 
 
 
+<<<<<<< before updating
+=======
+> [!NOTE]
+> This library was generated using [copier](https://copier.readthedocs.io/en/stable/) from the [Base Python Project Template repository](https://github.com/python-project-templates/base).
+>>>>>>> after updating

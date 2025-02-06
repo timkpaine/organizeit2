@@ -7,7 +7,7 @@ develop:  ## install dependencies and build library
 	python -m pip install -e .[develop]
 
 build:  ## build the python library
-	python setup.py build build_ext --inplace
+	python -m build -n
 
 install:  ## install library
 	python -m pip install .
@@ -34,7 +34,7 @@ format: fix
 ################
 # Other Checks #
 ################
-.PHONY: check-manifest checks check annotate
+.PHONY: check-manifest checks check
 
 check-manifest:  ## check python sdist manifest with check-manifest
 	check-manifest -v
@@ -43,9 +43,6 @@ checks: check-manifest
 
 # Alias
 check: checks
-
-annotate:  ## run python type annotation checks with mypy
-	python -m mypy ./organizeit2
 
 #########
 # TESTS #
@@ -89,7 +86,7 @@ dist-build:  # build python dists
 dist-check:  ## run python dist checker with twine
 	python -m twine check dist/*
 
-dist: clean build dist-build dist-check  ## build all dists
+dist: clean dist-build dist-check  ## build all dists
 
 publish: dist  # publish python assets
 
