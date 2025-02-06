@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 from fsspec import AbstractFileSystem
 
-from organizeit2 import Directory, DirectoryPath, OrganizeIt
+from organizeit2 import Directory, DirectoryPath, File, OrganizeIt
 
 
 class TestTypes:
@@ -19,6 +19,10 @@ class TestTypes:
         assert repr(d) == "Directory(path=file:///tmp)"
         assert str(d) == "file:///tmp"
         assert str(d.path) == "file:///tmp"
+
+    def test_directory_file_resolve(self, directory_str):
+        assert isinstance(File(path=directory_str).resolve(), Directory)
+        assert isinstance(Directory(path=f"file://{__file__}").resolve(), File)
 
     def test_directory_from_directorypath(self):
         Directory(path=DirectoryPath("local:///tmp"))

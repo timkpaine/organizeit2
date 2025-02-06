@@ -31,11 +31,11 @@ dependencies = [
     "fsspec",
 ]
 
-[project.urls]
-Repository = "https://github.com/timkpaine/organizeit2"
-Homepage = "https://github.com/timkpaine/organizeit2"
-
 [project.optional-dependencies]
+cli = [
+    "rich",
+    "typer",
+]
 develop = [
     "build",
     "bump-my-version",
@@ -48,9 +48,17 @@ develop = [
     "wheel",
     # backends
     "s3fs",
+    # cli
+    "rich",
+    "typer"
 ]
 
 [project.scripts]
+organizeit = "organizeit2.cli:main"
+
+[project.urls]
+Repository = "https://github.com/timkpaine/organizeit2"
+Homepage = "https://github.com/timkpaine/organizeit2"
 
 [tool.bumpversion]
 current_version = "0.2.1"
