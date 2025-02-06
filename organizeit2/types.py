@@ -5,17 +5,21 @@ from re import match as re_match
 from ccflow import BaseModel
 from fsspec.implementations.local import LocalFileSystem
 
-from .fsspec_types import DirectoryPath, FilePath, Path
+from .fsspec_types import DirectoryPath, FilePath, Path as BasePath
 
 __all__ = (
     "Directory",
     "File",
+    "Path",
 )
 
 
 class SharedAPI:
     def __str__(self) -> str:
         return str(self.path)
+
+    def str(self) -> str:
+        return str(self)
 
     def __hash__(self) -> str:
         return hash(str(self))
@@ -50,20 +54,39 @@ class SharedAPI:
             unlink(str(self.path.path))
 
     def resolve(self):
-        # TODO
-        if self.path.isdir():
-            return Directory(path=self.path)
-        return File(path=self.path)
+        path = self.path.resolve()
+        if path.isdir():
+            return Directory(path=path)
+        return File(path=path)
 
     def match(self, pattern: str, *, name_only: bool = True, invert: bool = False) -> bool:
         if name_only:
             return fnmatch(self.name, pattern) ^ invert
         return fnmatch(str(self), pattern) ^ invert
 
+    def all_match(self, pattern: str, *, name_only: bool = True, invert: bool = False) -> bool:
+        if isinstance(self, Directory):
+            return [_ for _ in self.ls() if _.match(pattern, name_only=name_only, invert=invert)]
+        return self.match(pattern, name_only=name_only, invert=invert)
+
     def rematch(self, re: str, *, name_only: bool = True, invert: bool = False) -> bool:
         if name_only:
             return (re_match(re, self.name) is not None) ^ invert
         return (re_match(re, str(self)) is not None) ^ invert
+
+    def all_rematch(self, re: str, *, name_only: bool = True, invert: bool = False) -> bool:
+        if isinstance(self, Directory):
+            return [_ for _ in self.ls() if _.rematch(re, name_only=name_only, invert=invert)]
+        return self.rematch(re, name_only=name_only, invert=invert)
+
+    # Convenience
+    @property
+    def fs(self):
+        return self.path.fs
+
+    @property
+    def localpath(self):
+        return self.path.path
 
     # Builtins
     @property
@@ -94,7 +117,17 @@ class SharedAPI:
     @property
     def parent(self):
         """The logical parent of the path."""
-        return Path(fs=self.path.fs, path=self.path.path.parent)
+        return Directory(path=BasePath(fs=self.path.fs, path=self.path.path.parent))
+
+    # Overlapping
+    def __truediv__(self, other):
+        return Path(BasePath(fs=self.path.fs, path=self.path.path / other)).resolve()
+
+
+class Path(SharedAPI, BaseModel):
+    def __new__(cls, path):
+        # Opt for File, unless we can tell its a dir
+        return File(path=path).resolve()
 
 
 class Directory(SharedAPI, BaseModel):
@@ -107,11 +140,14 @@ class Directory(SharedAPI, BaseModel):
         # TODO: sort?
         # TODO: make fast for large dirs?
         # this will autoresolve types correctly
-        paths = sorted(Path(fs=self.path.fs, path=path) for path in self.path.fs.ls(self.path.path))
+        paths = sorted(BasePath(fs=self.path.fs, path=path) for path in self.path.fs.ls(self.path.path))
         return [Directory(path=path) if path.isdir() else File(path=path) for path in paths]
 
     def list(self):
         return self.path.fs.listdir(self.path.path)
+
+    def __len__(self) -> int:
+        return len(self.list())
 
     def _recurse_gen(self):
         # this will autoresolve types correctly
