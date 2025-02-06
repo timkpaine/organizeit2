@@ -61,10 +61,6 @@ organizeit = "organizeit2.cli:main"
 Repository = "https://github.com/timkpaine/organizeit2"
 Homepage = "https://github.com/timkpaine/organizeit2"
 
-[project.urls]
-Repository = "https://github.com/timkpaine/organizeit2"
-Homepage = "https://github.com/timkpaine/organizeit2"
-
 [tool.bumpversion]
 current_version = "0.2.1"
 commit = true
