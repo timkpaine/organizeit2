@@ -2,7 +2,7 @@ from pathlib import Path as BasePath
 
 from fsspec import AbstractFileSystem
 
-from organizeit2 import DirectoryPath, FilePath, FileSystem, Path
+from organizeit2 import BasePath as Path, DirectoryPath, FilePath, FileSystem
 
 
 class TestFSSpecTypes:

@@ -20,14 +20,20 @@ def match(directory_or_file: str, pattern: str, *, name_only: bool = True, inver
     raise Exit(1 - int(ret))
 
 
-def all_match(directory: str, pattern: str, *, name_only: bool = True, invert: bool = False) -> bool:
+def all_match(directory: str, pattern: str, *, list: bool = False, name_only: bool = True, invert: bool = False) -> bool:
     p = Directory(path=directory).resolve()
     if not isinstance(p, Directory):
         raise Exit(1)
-    unmatch = [_ for _ in p.ls() if not _.match(pattern, name_only=name_only, invert=invert)]
-    if unmatch:
-        _unmatched_table(unmatch)
-    raise Exit(min(len(unmatch), 1))
+    matched = p.all_match(pattern, name_only=name_only, invert=invert)
+    if list:
+        for _ in matched:
+            print(_)
+        raise Exit(0)
+    all = p.ls()
+    intersection = set(all) - set(matched)
+    if intersection:
+        _unmatched_table(intersection)
+    raise Exit(min(len(intersection), 1))
 
 
 def rematch(directory_or_file: str, pattern: str, *, name_only: bool = True, invert: bool = False) -> bool:
@@ -36,14 +42,20 @@ def rematch(directory_or_file: str, pattern: str, *, name_only: bool = True, inv
     raise Exit(1 - int(ret))
 
 
-def all_rematch(directory: str, pattern: str, *, name_only: bool = True, invert: bool = False) -> bool:
+def all_rematch(directory: str, pattern: str, *, list: bool = False, name_only: bool = True, invert: bool = False) -> bool:
     p = Directory(path=directory).resolve()
     if not isinstance(p, Directory):
         raise Exit(1)
-    unmatch = [_ for _ in p.ls() if not _.rematch(pattern, name_only=name_only, invert=invert)]
-    if unmatch:
-        _unmatched_table(unmatch)
-    raise Exit(min(len(unmatch), 1))
+    matched = p.all_rematch(pattern, name_only=name_only, invert=invert)
+    if list:
+        for _ in matched:
+            print(_)
+        raise Exit(0)
+    all = p.ls()
+    intersection = set(all) - set(matched)
+    if intersection:
+        _unmatched_table(intersection)
+    raise Exit(min(len(intersection), 1))
 
 
 def main(_test: bool = False):

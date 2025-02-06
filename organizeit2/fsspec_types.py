@@ -80,6 +80,11 @@ class Path:
     def isfile(self) -> bool:
         return self.type == "fsspec-file"
 
+    def resolve(self) -> "Path":
+        if self.fs.isdir(self.path):
+            return DirectoryPath(fs=self.fs, path=self.path.resolve())
+        return FilePath(fs=self.fs, path=self.path.resolve())
+
     def __repr__(self) -> str:
         return f"{'DirectoryPath' if self.type == 'fsspec-dir' else 'FilePath'}(fs={self.fs.unstrip_protocol('')}, path={str(self.path)})"
 

@@ -1,9 +1,9 @@
-from pathlib import Path
+from pathlib import Path as BasePath
 
 import pytest
 from fsspec import AbstractFileSystem
 
-from organizeit2 import Directory, DirectoryPath, File, OrganizeIt
+from organizeit2 import Directory, DirectoryPath, File, OrganizeIt, Path
 
 
 class TestTypes:
@@ -14,7 +14,7 @@ class TestTypes:
     def test_directory(self):
         d = Directory(path="local:///tmp")
         assert isinstance(d.path.fs, AbstractFileSystem)
-        assert isinstance(d.path.path, Path)
+        assert isinstance(d.path.path, BasePath)
         assert d.model_dump_json() == '{"path":"file:///tmp","type_":"organizeit2.types.Directory"}'
         assert repr(d) == "Directory(path=file:///tmp)"
         assert str(d) == "file:///tmp"
@@ -22,7 +22,9 @@ class TestTypes:
 
     def test_directory_file_resolve(self, directory_str):
         assert isinstance(File(path=directory_str).resolve(), Directory)
+        assert isinstance(Path(path=directory_str).resolve(), Directory)
         assert isinstance(Directory(path=f"file://{__file__}").resolve(), File)
+        assert isinstance(Path(path=f"file://{__file__}").resolve(), File)
 
     def test_directory_from_directorypath(self):
         Directory(path=DirectoryPath("local:///tmp"))
@@ -70,6 +72,11 @@ class TestTypes:
         assert d.match("*organizeit2*directory", name_only=False)
         assert d.match("*organizeit2*directory", name_only=False, invert=True) is False
 
+    def test_all_match(self, directory_str):
+        d = Directory(path=directory_str)
+        assert len(d.all_match("subdir*")) == 4
+        assert len(d.all_match("dir*")) == 0
+
     def test_rematch(self, directory_str):
         d = Directory(path=directory_str)
         assert d.rematch("directory")
@@ -78,7 +85,14 @@ class TestTypes:
         assert d.rematch("directory", name_only=False, invert=True)
         assert d.rematch("file://[a-zA-Z0-9/]*", name_only=False)
 
-    # TODO
-    # def test_directory_list(self, directory_str):
-    #     d = Directory(path=directory_str)
-    #     assert d.list() == []
+    def test_all_rematch(self, directory_str):
+        d = Directory(path=directory_str)
+        assert len(d.all_rematch("subdir[0-9]+")) == 4
+        assert len(d.all_rematch("subdir[0-3]+")) == 3
+
+    def test_convenience(self):
+        d = File(path=f"file://{__file__}")
+        assert str(d).endswith("test_types.py")
+        assert (d / "..").resolve().str().endswith("tests")
+        assert (d / "..").resolve() == d.parent.resolve()
+        assert (d / ".." / ".." / "tests").resolve() == d.parent.resolve()
