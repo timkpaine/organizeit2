@@ -1,69 +1,82 @@
 from rich.console import Console
 from rich.table import Table
-from typer import Exit, Typer
+from typer import Exit, Option, Typer
+from typing_extensions import Annotated
 
-from organizeit2 import Directory, File
+from organizeit2 import Directory
 
 
 def _unmatched_table(unmatch):
-    table = Table(title="Unmatched")
-    table.add_column("Path", style="cyan")
-    for _ in unmatch:
-        table.add_row(str(_))
-    console = Console()
-    console.print(table)
+    if unmatch:
+        table = Table(title="Unmatched")
+        table.add_column("Path", style="cyan")
+        for _ in unmatch:
+            table.add_row(str(_))
+        console = Console()
+        console.print(table)
+    else:
+        print("All matched")
 
 
-def match(directory_or_file: str, pattern: str, *, name_only: bool = True, invert: bool = False) -> bool:
-    p = File(path=directory_or_file)
-    ret = p.resolve().match(pattern, name_only=name_only, invert=invert)
-    raise Exit(1 - int(ret))
-
-
-def all_match(directory: str, pattern: str, *, list: bool = False, name_only: bool = True, invert: bool = False) -> bool:
+def match(
+    directory: str,
+    pattern: str,
+    *,
+    list: Annotated[bool, Option("--list/--no-list", "-l/-L")] = False,
+    name_only: Annotated[bool, Option("--name-only/--no-name-only", "-n/-N")] = True,
+    invert: Annotated[bool, Option("--invert/--no-invert", "-i/-I")] = False,
+) -> bool:
     p = Directory(path=directory).resolve()
-    if not isinstance(p, Directory):
-        raise Exit(1)
-    matched = p.all_match(pattern, name_only=name_only, invert=invert)
-    if list:
-        for _ in matched:
-            print(_)
-        raise Exit(0)
-    all = p.ls()
+    if not isinstance(p, Directory) or not directory.endswith("/"):
+        matched = [p] if p.resolve().match(pattern, name_only=name_only, invert=invert) else []
+        all = [] if matched else [p]
+    else:
+        matched = p.all_match(pattern, name_only=name_only, invert=invert)
+        all = p.ls()
     intersection = set(all) - set(matched)
-    if intersection:
+    if list:
+        for _ in intersection:
+            print(_.as_posix())
+    else:
         _unmatched_table(intersection)
     raise Exit(min(len(intersection), 1))
 
 
-def rematch(directory_or_file: str, pattern: str, *, name_only: bool = True, invert: bool = False) -> bool:
-    p = File(path=directory_or_file)
-    ret = p.resolve().rematch(pattern, name_only=name_only, invert=invert)
-    raise Exit(1 - int(ret))
-
-
-def all_rematch(directory: str, pattern: str, *, list: bool = False, name_only: bool = True, invert: bool = False) -> bool:
+def rematch(
+    directory: str,
+    pattern: str,
+    *,
+    list: Annotated[bool, Option("--list/--no-list", "-l/-L")] = False,
+    name_only: Annotated[bool, Option("--name-only/--no-name-only", "-n/-N")] = True,
+    invert: Annotated[bool, Option("--invert/--no-invert", "-i/-I")] = False,
+) -> bool:
     p = Directory(path=directory).resolve()
-    if not isinstance(p, Directory):
-        raise Exit(1)
-    matched = p.all_rematch(pattern, name_only=name_only, invert=invert)
-    if list:
-        for _ in matched:
-            print(_)
-        raise Exit(0)
-    all = p.ls()
+    if not isinstance(p, Directory) or not directory.endswith("/"):
+        matched = [p] if p.resolve().rematch(pattern, name_only=name_only, invert=invert) else []
+        all = [] if matched else [p]
+    else:
+        matched = p.all_rematch(pattern, name_only=name_only, invert=invert)
+        all = p.ls()
+
+    # calculate the overlap
     intersection = set(all) - set(matched)
-    if intersection:
+
+    # return code means everything looked for was matched
+    return_code = 0 if not intersection else 1
+    if list:
+        for _ in intersection:
+            print(_.as_posix())
+    else:
         _unmatched_table(intersection)
-    raise Exit(min(len(intersection), 1))
+    raise Exit(return_code)
 
 
 def main(_test: bool = False):
     app = Typer()
     app.command("match")(match)
-    app.command("all-match")(all_match)
+    app.command("all-match")(match)
     app.command("rematch")(rematch)
-    app.command("all-rematch")(all_rematch)
+    app.command("all-rematch")(rematch)
     if _test:
         return app
     return app()
