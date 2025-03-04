@@ -30,6 +30,9 @@ class SharedAPI:
     def exists(self) -> bool:
         return self.path.fs.exists(self.path.path)
 
+    def as_posix(self) -> str:
+        return self.path.path.as_posix()
+
     def _can_link(self) -> bool:
         return hasattr(self.path.fs, "link")
 
