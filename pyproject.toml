@@ -46,6 +46,7 @@ develop = [
     "pytest-cov",
     "ruff",
     "twine",
+    "uv",
     "wheel",
     # backends
     "s3fs",
