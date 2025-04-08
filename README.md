@@ -11,7 +11,6 @@
 
 The name is because `organizeit` was [taken on pypi](https://pypi.org/project/organizeit/), and is thus a reference to the [joke from Parks and Rec](https://parksandrecreation.fandom.com/wiki/The_Reasonabilists).
 
-
 ## Overview
 
 `OrganizeIt2` has the following models and types:
