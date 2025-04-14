@@ -5,13 +5,17 @@ from typing_extensions import Annotated
 
 from organizeit2 import Directory
 
+_list = list
+
 
 def _unmatched_table(unmatch):
     if unmatch:
         table = Table(title="Unmatched")
         table.add_column("Path", style="cyan")
+        table.add_column("Size", style="cyan")
+        table.add_column("Modified", style="cyan")
         for _ in unmatch:
-            table.add_row(str(_))
+            table.add_row(str(_), str(_.size(0)), _.modified().isoformat())
         console = Console()
         console.print(table)
     else:
@@ -25,6 +29,11 @@ def match(
     list: Annotated[bool, Option("--list/--no-list", "-l/-L")] = False,
     name_only: Annotated[bool, Option("--name-only/--no-name-only", "-n/-N")] = True,
     invert: Annotated[bool, Option("--invert/--no-invert", "-i/-I")] = False,
+    limit: Annotated[int, Option("--limit")] = None,
+    leaves: Annotated[int, Option("--leaves")] = None,
+    by: Annotated[str, Option("--by")] = "age",
+    desc: Annotated[bool, Option("--desc")] = False,
+    block_size: Annotated[int, Option("--block-size")] = 0,
 ) -> bool:
     p = Directory(path=directory).resolve()
     if not isinstance(p, Directory) or not directory.endswith("/"):
@@ -33,7 +42,24 @@ def match(
     else:
         matched = p.all_match(pattern, name_only=name_only, invert=invert)
         all = p.ls()
-    intersection = set(all) - set(matched)
+
+    # calculate the overlap
+    intersection = _list(set(all) - set(matched))
+
+    # Handle limit
+    if limit or leaves:
+        if by == "age":
+            intersection = sorted(intersection, key=lambda x: x.modified(), reverse=desc)
+        elif by == "size":
+            intersection = sorted(intersection, key=lambda x: x.size(block_size), reverse=desc)
+        else:
+            raise NotImplementedError()
+
+        if leaves:
+            intersection = intersection[:-leaves]
+        if limit:
+            intersection = intersection[:limit]
+
     if list:
         for _ in intersection:
             print(_.as_posix())
@@ -49,6 +75,11 @@ def rematch(
     list: Annotated[bool, Option("--list/--no-list", "-l/-L")] = False,
     name_only: Annotated[bool, Option("--name-only/--no-name-only", "-n/-N")] = True,
     invert: Annotated[bool, Option("--invert/--no-invert", "-i/-I")] = False,
+    limit: Annotated[int, Option("--limit")] = None,
+    leaves: Annotated[int, Option("--leaves")] = None,
+    by: Annotated[str, Option("--by")] = "age",
+    desc: Annotated[bool, Option("--desc")] = False,
+    block_size: Annotated[int, Option("--block-size")] = 0,
 ) -> bool:
     p = Directory(path=directory).resolve()
     if not isinstance(p, Directory) or not directory.endswith("/"):
@@ -59,7 +90,21 @@ def rematch(
         all = p.ls()
 
     # calculate the overlap
-    intersection = set(all) - set(matched)
+    intersection = _list(set(all) - set(matched))
+
+    # Handle limit
+    if limit or leaves:
+        if by == "age":
+            intersection = sorted(intersection, key=lambda x: x.modified(), reverse=desc)
+        elif by == "size":
+            intersection = sorted(intersection, key=lambda x: x.size(block_size), reverse=desc)
+        else:
+            raise NotImplementedError()
+
+        if leaves:
+            intersection = intersection[:-leaves]
+        if limit:
+            intersection = intersection[:limit]
 
     # return code means everything looked for was matched
     return_code = 0 if not intersection else 1

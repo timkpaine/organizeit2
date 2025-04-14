@@ -1,3 +1,4 @@
+from datetime import datetime
 from fnmatch import fnmatch
 from os import symlink, unlink
 from re import match as re_match
@@ -121,6 +122,9 @@ class SharedAPI:
     def parent(self):
         """The logical parent of the path."""
         return Directory(path=BasePath(fs=self.path.fs, path=self.path.path.parent))
+
+    def modified(self) -> datetime:
+        return self.path.fs.modified(self.path.path)
 
     # Overlapping
     def __truediv__(self, other):
