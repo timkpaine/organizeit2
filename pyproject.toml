@@ -115,7 +115,6 @@ packages = ["organizeit2"]
 
 [tool.pytest.ini_options]
 addopts = ["-vvv", "--junitxml=junit.xml"]
-asyncio_mode = "strict"
 testpaths = "organizeit2/tests"
 
 [tool.ruff]
