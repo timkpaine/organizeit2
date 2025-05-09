@@ -4,7 +4,7 @@ build-backend="hatchling.build"
 
 [project]
 name = "organizeit2"
-authors = [{name = "the organizeit2 authors", email = "3105306+timkpaine@users.noreply.github.com"}]
+authors = [{name = "the organizeit2 authors", email = "t.paine154@gmail.com"}]
 description = "Engage with Zorp!"
 readme = "README.md"
 license = { text = "Apache-2.0" }
@@ -60,13 +60,13 @@ develop = [
 organizeit = "organizeit2.cli:main"
 
 [project.urls]
-Repository = "https://github.com/timkpaine/organizeit2"
-Homepage = "https://github.com/timkpaine/organizeit2"
+Repository = "https://github.com/1kbgz/organizeit2"
+Homepage = "https://github.com/1kbgz/organizeit2"
 
 [tool.bumpversion]
 current_version = "0.6.0"
 commit = true
-tag = false 
+tag = false
 
 [[tool.bumpversion.files]]
 filename = "organizeit2/__init__.py"
